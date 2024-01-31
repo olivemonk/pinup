@@ -59,3 +59,5 @@ const CursorsPresence = memo(() => {
 });
 
 export default CursorsPresence;
+
+CursorsPresence.displayName = "CursorsPresence";

@@ -114,3 +114,5 @@ const SelectionTool = memo(
 );
 
 export default SelectionTool;
+
+SelectionTool.displayName = "SelectionTool";
