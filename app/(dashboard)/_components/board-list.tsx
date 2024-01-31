@@ -58,7 +58,7 @@ const BoardList = ({ orgId, query }: BoardListProps) => {
         {data?.map((board) => (
           <BoardCard
             key={board._id}
-            isFavourite={false}
+            isFavourite={board.isFavourite}
             id={board._id}
             title={board.title}
             createdAt={board._creationTime}

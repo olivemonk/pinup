@@ -6,9 +6,10 @@ export const get = query({
     orgId: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = ctx.auth.getUserIdentity();
+    const identity = await ctx.auth.getUserIdentity();
+
     if (!identity) {
-      throw new Error("Unauthenticated");
+      throw new Error("Unauthorized");
     }
     const boards = await ctx.db
       .query("boards")
@@ -16,6 +17,20 @@ export const get = query({
       .order("desc")
       .collect();
 
-      return boards;
+    const boardsWithFavouriteRelation = boards.map(async (board) => {
+      const favourite = await ctx.db
+        .query("userFavourites")
+        .withIndex("by_user_board", (q) => q.eq("userId", identity.subject).eq("boardId", board._id)
+        )
+        .unique();
+      return {
+        ...board,
+        isFavourite: !!favourite,
+      };
+    });
+
+    const boardsWithFavouriteBoolean = Promise.all(boardsWithFavouriteRelation);
+
+    return boardsWithFavouriteBoolean;
   },
 });
