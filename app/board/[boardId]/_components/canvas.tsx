@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Info from "./info";
 import Participants from "./participants";
 import { nanoid } from "nanoid";
@@ -39,6 +39,8 @@ import { LayerPreview } from "./layer-preview";
 import SelectionBox from "./selection-box";
 import SelectionTool from "./selection-tool";
 import { Path } from "./path";
+import { useDisableScrollBounce } from "@/hooks/use-disable-scroll-bounce";
+import { useDeleteLayers } from "@/hooks/use-delete-layers";
 
 const MAX_LAYER = 100;
 
@@ -61,6 +63,7 @@ const Canvas = ({ boardId }: CanvasProps) => {
     b: 0,
   });
 
+  useDisableScrollBounce();
   const history = useHistory();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
@@ -382,6 +385,34 @@ const Canvas = ({ boardId }: CanvasProps) => {
 
     return layerIdsToColorSelection;
   }, [selections]);
+
+  const deleteLayers = useDeleteLayers();
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      switch (e.key) {
+        // case "Backspace":
+        //   deleteLayers();
+        //   break;
+        case "z": {
+          if (e.ctrlKey || e.metaKey) {
+            if (e.shiftKey) {
+              history.redo();
+            } else {
+              history.undo();
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [deleteLayers, history]);
 
   return (
     <main className="h-full w-full relative bg-neutral-100 touch-none">
